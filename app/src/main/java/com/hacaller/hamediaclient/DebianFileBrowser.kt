@@ -65,7 +65,7 @@ fun DebianFileBrowser(host: String, user: String, pass: String) {
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
             if (currentPath != "/" && currentPath != "/home/$user") {
                 IconButton(onClick = {
                     val parent = File(currentPath).parent ?: "/"
