@@ -63,6 +63,39 @@ fun downloadFromDebian(
     }
 }
 
+fun uploadToDebian(
+    host: String,
+    user: String,
+    pass: String,
+    localFile: File,
+    remoteDir: String,
+    onProgress: (Float) -> Unit = {}
+) {
+    val ssh = SSHClient()
+    ssh.addHostKeyVerifier(PromiscuousVerifier())
+    ssh.connect(host)
+    try {
+        ssh.authPassword(user, pass)
+        val sftp = ssh.newSFTPClient()
+        sftp.use { client ->
+            client.fileTransfer.setTransferListener(object : TransferListener {
+                override fun directory(name: String?): TransferListener = this
+                override fun file(name: String?, size: Long): StreamCopier.Listener {
+                    return StreamCopier.Listener { transferred ->
+                        if (size > 0) {
+                            onProgress(transferred.toFloat() / size)
+                        }
+                    }
+                }
+            })
+            val remotePath = if (remoteDir.endsWith("/")) "$remoteDir${localFile.name}" else "$remoteDir/${localFile.name}"
+            client.fileTransfer.upload(FileSystemFile(localFile), remotePath)
+        }
+    } finally {
+        ssh.disconnect()
+    }
+}
+
 fun fetchFileList(host: String, user: String, pass: String, remoteDir: String): List<RemoteFile> {
     val ssh = SSHClient()
     ssh.addHostKeyVerifier(PromiscuousVerifier())
