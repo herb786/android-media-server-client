@@ -1,6 +1,7 @@
 package com.hacaller.hamediaclient
 
 import android.net.Uri
+import android.os.Environment
 import android.provider.OpenableColumns
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -181,7 +182,10 @@ fun DebianFileBrowser(host: String, user: String, pass: String) {
                             scope.launch(Dispatchers.IO) {
                                 isTransferring = true
                                 transferType = "Downloading"
-                                val target = File(context.getExternalFilesDir(null), file.name)
+                                val target = File(
+                                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                                    file.name
+                                )
                                 try {
                                     downloadWithProgress(host, user, pass, file.fullPath, target) { p ->
                                         progress = p
